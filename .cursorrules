@@ -1,0 +1,99 @@
+# Cursor Rules for App Lock: Islam360
+
+## Project Overview
+This is a Flutter app that intercepts distracting apps and shows Islamic content (Quranic verses, Hadiths) before unlocking. We're building incrementally, starting with Android app lock functionality.
+
+## Implementation Strategy
+- **Incremental Development**: Build and validate each phase before moving to the next
+- **Android First**: Focus on Android implementation, iOS comes later
+- **Fix Issues Immediately**: If something breaks, fix it before continuing
+
+## Project Structure
+Follow the structure outlined in README.md:
+```
+lib/
+├── core/          # Core services, models, utils, constants
+├── data/          # Local storage and remote repositories
+├── features/      # Feature-based modules (app_lock, app_selection, settings)
+└── main.dart
+```
+
+## Code Style & Conventions
+
+### Dart/Flutter Best Practices
+- Use `const` constructors wherever possible
+- Prefer named parameters for functions with 3+ parameters
+- Use `late` or nullable types appropriately
+- Follow Flutter linting rules (flutter_lints)
+- Use meaningful variable and function names
+- Add comments for complex logic
+
+### File Naming
+- Use `snake_case` for file names: `app_list_service.dart`
+- Use `PascalCase` for class names: `AppListService`
+- Use `camelCase` for variables and functions: `getInstalledApps()`
+
+### State Management
+- Use StatefulWidget for local state
+- Consider Provider/Riverpod for shared state (if needed later)
+- Keep state as local as possible
+
+### Error Handling
+- Always handle errors gracefully
+- Show user-friendly error messages
+- Log errors for debugging
+- Use try-catch blocks for async operations
+
+## Dependencies
+Current packages (add as needed):
+- `system_alert_window` - Android overlay
+- `flutter_background_service` - Background monitoring
+- `usage_stats` - App detection
+- `permission_handler` - Permissions
+- `device_apps` - Get installed apps
+- `shared_preferences` - Local storage
+
+## Android-Specific Notes
+- Always check and request permissions before using features
+- Handle battery optimization exemptions
+- Test on real devices (not just emulator)
+- Use `SYSTEM_ALERT_WINDOW` permission for overlays
+- Background services need proper lifecycle management
+
+## Implementation Phases (Current Focus)
+We're following the TODO list in README.md:
+1. **Phase 1**: Base project structure ✅
+2. **Phase 2**: Get and display installed apps (CURRENT)
+3. **Phase 3**: App selection and storage
+4. **Phase 4**: Android app lock implementation
+5. **Phase 5**: Lock screen functionality
+6. **Phase 6**: Polish and validation
+
+## When Creating New Files
+1. Create files in the appropriate directory according to project structure
+2. Add necessary imports at the top
+3. Follow existing code patterns
+4. Add basic error handling
+5. Test immediately after creation
+
+## Testing Approach
+- Test each feature as you build it
+- Use print statements for debugging (remove before commit)
+- Test on real Android device when possible
+- Verify permissions are requested correctly
+- Test app restart scenarios
+
+## Important Reminders
+- Always check README.md for project structure and TODO list
+- Follow incremental development - don't skip phases
+- Fix bugs immediately when found
+- Keep code simple and readable
+- Add comments for complex logic
+- Test on real device for app lock features
+
+## What NOT to Do
+- Don't skip validation steps
+- Don't implement features out of order
+- Don't ignore permission handling
+- Don't forget error handling
+- Don't commit debug print statements

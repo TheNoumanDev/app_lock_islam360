@@ -1,0 +1,50 @@
+# Build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub/
+.pub-cache/
+
+# Generated files
+**/generated/
+**/*.g.dart
+**/*.freezed.dart
+**/GeneratedPluginRegistrant.*
+
+# Platform-specific build files
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/.last_build_id
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Logs and temporary files
+*.log
+*.swp
+*.class
+.DS_Store
+
+# Dependencies
+node_modules/
+pubspec.lock
+
+# Test coverage
+coverage/
+
+# Documentation builds
+doc/api/
+
+# Symbolication files
+app.*.symbols
+app.*.map.json
