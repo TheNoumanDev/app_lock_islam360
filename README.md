@@ -1,10 +1,27 @@
-# App lock: Islam360
+# Nafs Guard (App Lock: Islam360)
 
 **Transform distractions into reminders of Allah**
 
-An app lock that intercepts distracting apps and presents Islamic content (Quranic verses, Hadiths) based on your current emotional state, requiring reflection before unlocking.
+A gentle reminder app that intercepts distracting apps and presents Islamic content (Quranic verses, Hadiths) to encourage reflection before continuing. Not a strict blocker - a spiritual companion.
 
 **Company:** [theDumbNetwork](https://github.com/theDumbNetwork)
+
+---
+
+## App Features
+
+| Feature | Description |
+|---------|-------------|
+| **App Lock** | Intercept distracting apps, show Islamic content as reminder |
+| **Quran Section** | Read Quran with translations |
+| **Hadith Section** | Browse authentic Hadith collection |
+| **Prayer Times** | Namaz timings display |
+| **Alarms** | Islamic alarms with wakeup duas + morning check-ins |
+| **Ayat Reminder** | Show Quranic verse on locked app (configurable frequency) |
+| **Feeling Input** | Select mood → LLM suggests relevant Ayat/Hadith |
+| **Reflection Timer** | 3-second wait before dismiss (ensures reading) |
+| **Noor Streak** | Track consecutive reflection days |
+| **Emergency Skip** | Shake to bypass (emergencies only) |
 
 ---
 
@@ -12,39 +29,35 @@ An app lock that intercepts distracting apps and presents Islamic content (Quran
 
 When you try to open a restricted app (Instagram, TikTok, etc.):
 
-1. **App Lock Screen**: Always appears when opening a restricted app
-2. **Feeling Input** (optional, based on user preference):
-   - **Text Input**: User can type their current feeling/scenario
-   - **OR Predefined Options**: Scrollable list of predefined emotional states (Anxious, Ungrateful, Bored, Sad, Stressed, etc.)
-3. **LLM Mapping**: Free/low-cost LLM maps user's feeling/scenario to relevant Ayat or Hadith
-4. **Spiritual Content Display**: Shows the matched Quranic Ayat or Hadith with translation
-5. **Reflection Timer**: 3-second countdown before "Done" button is enabled (ensures user reads the content)
-6. **Streak Tracking**: Mark as complete to maintain Noor Streak (consecutive reflections)
-7. **Password Lock** (optional): User can configure to require password after reading (for extra security)
-8. **Emergency Skip**: Shake device to skip (for emergencies)
+1. **Reminder Screen**: Appears when opening a restricted app
+2. **Feeling Input** (optional):
+   - **Text Input**: Type current feeling/scenario
+   - **OR Predefined Options**: Select from emotional states (Anxious, Bored, Sad, Stressed, etc.)
+3. **LLM Mapping**: Maps feeling to relevant Ayat or Hadith
+4. **Content Display**: Shows matched Quranic Ayat or Hadith with translation
+5. **Reflection Timer**: 3-second countdown before "Done" button enabled
+6. **Streak Tracking**: Complete to maintain Noor Streak
+7. **Emergency Skip**: Shake device to skip (for emergencies)
 
 ### Content Frequency
 
-- **App Lock**: Appears every time user opens a restricted app
-- **Ayat/Hadith Display**: User configurable frequency:
+- **Reminder Screen**: Appears when opening restricted app
+- **Ayat/Hadith Display**: User configurable:
   - Once per day
   - Twice per day
   - Thrice per day
-  - Or disabled (password only)
 
 ---
 
 ## Key Features
 
-- **Intelligent Content Matching**: LLM-powered mapping of user feelings to relevant Islamic content
-- **Flexible Input Methods**: Text input or predefined scrollable options
-- **Noor Streak**: Track consecutive reflections (no skips)
-- **Configurable Lock Modes**:
-  - **Content + Password**: Show Ayat/Hadith + require password
-  - **Password Only**: Skip content, just password protection
-  - **Content Frequency**: Once/twice/thrice per day
-- **Emergency Skip**: Shake device to bypass (for emergencies)
-- **Session Timer**: Auto-lock after set duration (future feature)
+- **Gentle Reminder**: Not a strict blocker - encourages reflection, then allows access
+- **Quran & Hadith**: Full sections to read and browse Islamic content
+- **Prayer Times**: Stay connected with Salah timings
+- **Islamic Alarms**: Wake up with duas, morning check-ins for streaks
+- **Intelligent Content**: LLM-powered mapping of feelings to relevant content
+- **Noor Streak**: Track consecutive reflections (gamification)
+- **Emergency Skip**: Shake device to bypass when needed
 
 ---
 
@@ -207,19 +220,40 @@ lib/
 ├── features/
 │   ├── app_lock/
 │   │   ├── screens/
-│   │   │   ├── lock_screen.dart        # Main lock screen
-│   │   │   └── password_screen.dart    # Password input
+│   │   │   └── lock_screen.dart        # Main reminder screen
 │   │   ├── widgets/
 │   │   │   └── lock_overlay.dart       # Overlay widget
 │   │   └── viewmodels/
 │   │       └── lock_viewmodel.dart
 │   │
+│   ├── quran/
+│   │   ├── screens/
+│   │   │   └── quran_screen.dart       # Quran reading
+│   │   └── widgets/
+│   │       └── ayat_widget.dart
+│   │
+│   ├── hadith/
+│   │   ├── screens/
+│   │   │   └── hadith_screen.dart      # Hadith browsing
+│   │   └── widgets/
+│   │       └── hadith_card.dart
+│   │
+│   ├── prayer_times/
+│   │   ├── screens/
+│   │   │   └── prayer_times_screen.dart # Namaz timings
+│   │   └── widgets/
+│   │       └── prayer_time_card.dart
+│   │
+│   ├── alarm/
+│   │   ├── screens/
+│   │   │   ├── alarm_list_screen.dart  # List of alarms
+│   │   │   └── alarm_trigger_screen.dart # Dua + check-in
+│   │   └── widgets/
+│   │       └── alarm_card.dart
+│   │
 │   ├── content_display/
 │   │   ├── screens/
-│   │   │   └── reflection_screen.dart # Ayat/Hadith display
-│   │   ├── widgets/
-│   │   │   ├── ayat_widget.dart
-│   │   │   └── hadith_widget.dart
+│   │   │   └── reflection_screen.dart # Ayat/Hadith display (on lock)
 │   │   └── viewmodels/
 │   │       └── content_viewmodel.dart
 │   │
@@ -301,13 +335,15 @@ lib/
 ## Implementation Priority
 
 1. ✅ **Android PoC** - Build proof of concept on Android first
-2. 🔄 **Core Lock Flow** - App lock screen with feeling input + content display
+2. 🔄 **Core Lock Flow** - Reminder screen with feeling input + content display
 3. 🤖 **LLM Integration** - Map user feelings to Ayat/Hadith
 4. ⚠️ **Battery Optimization** - Critical: Guide users to disable battery optimization
 5. 📊 **Content Curation** - Store Ayat/Hadith in Firestore, ensure quality mappings
 6. ⏱️ **Timer & Streak** - 3-second timer, streak tracking
-7. 🔐 **Password Lock** - Optional password after content
-8. 🍎 **iOS** - Implement after Android is stable
+7. 📖 **Quran & Hadith Sections** - Full reading/browsing experience
+8. 🕌 **Prayer Times** - Namaz timings display
+9. ⏰ **Alarm Feature** - Islamic alarms with wakeup duas & check-ins (see `docs/ALARM_FEATURE.md`)
+10. 🍎 **iOS** - Implement after Android is stable
 
 ---
 
@@ -548,6 +584,40 @@ lib/
 
 ---
 
+### Phase 9: Alarm Feature (Future)
+
+> See detailed implementation plan: `docs/ALARM_FEATURE.md`
+
+#### 9.1 Basic Alarm Setup
+- [ ] Add alarm permissions to `AndroidManifest.xml`:
+  - `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`
+  - `USE_FULL_SCREEN_INTENT`
+  - `RECEIVE_BOOT_COMPLETED`
+  - `POST_NOTIFICATIONS`
+- [ ] Create native helpers:
+  - `AlarmHelper.kt` - Schedule/cancel alarms
+  - `AlarmReceiver.kt` - Handle alarm triggers
+  - `AlarmNotificationService.kt` - Full-screen notification
+- [ ] Add MethodChannel methods for alarm scheduling
+
+#### 9.2 Alarm UI
+- [ ] Create alarm list screen
+- [ ] Create alarm editor (time picker, repeat days)
+- [ ] Create alarm trigger screen (wakeup dua + check-in)
+
+#### 9.3 Full-Screen Notification
+- [ ] Implement full-screen intent for lock screen display
+- [ ] Handle Android 14+ FSI restrictions
+- [ ] Add snooze/dismiss actions
+
+#### 9.4 Integration
+- [ ] Connect to streak system (morning check-ins)
+- [ ] Add wakeup duas content
+- [ ] Boot receiver for rescheduling after reboot
+- [ ] Prayer time integration (optional)
+
+---
+
 ## Validation Checklist (Before Moving to Backend)
 
 - [x] App list displays correctly ✅
@@ -664,38 +734,44 @@ flutter pub add firebase_core cloud_firestore firebase_auth isar shake
    - Reflection timer
    - Streak tracking
 
-### 🗑️ Extra Code to Remove
+### 🗑️ Removed/Deprecated Code
 
-1. **`flutter_background_service`** ⚠️
-   - **Status**: Currently used but may be removable
-   - **Location**: 
-     - `lib/core/services/app_monitor_service.dart` (lines 85-104, 178)
-     - `android/app/src/main/AndroidManifest.xml` (BackgroundService declarations)
-   - **Reason**: Primary app detection is now handled by Accessibility Service. The background service is configured but not actively used for monitoring (monitoring is done via Accessibility Service or local polling timer).
-   - **Action**: 
-     - **Option A**: Remove entirely if Accessibility Service is always preferred
-     - **Option B**: Keep as fallback if Accessibility Service is disabled (current approach)
-   - **Recommendation**: Keep for now as fallback, but can be removed if Accessibility Service becomes the only method.
+1. **Deprecated packages** ✅
+   - `device_apps` - Removed (replaced with native `PackageManager`)
+   - `usage_stats` - Removed (replaced with native `UsageStatsManager`)
+   - `system_alert_window` - Removed (replaced with native `WindowManager`)
+   - `permission_handler` - Removed (permissions handled natively via Android APIs)
 
-2. **Unused Flutter lock screen widget** ⚠️
-   - **Status**: Created but not used
-   - **Location**: `lib/features/app_lock/screens/lock_screen.dart`
-   - **Reason**: We're using native Android overlay (`lock_screen_overlay.xml`) instead
-   - **Action**: Can be removed or kept for future Flutter-based lock screen implementation
-   - **Recommendation**: Keep for now if we plan to add Flutter-based lock screen with Islamic content later
-
-3. **Deprecated packages** ✅
-   - `device_apps` - Removed (replaced with native implementation)
-   - `usage_stats` - Removed (replaced with native implementation)
-   - `system_alert_window` - Removed (replaced with native implementation)
+2. **`flutter_background_service`** ⚠️ (Kept for foreground notification)
+   - **Status**: Kept but monitoring logic moved elsewhere
+   - **Reason**: Provides persistent foreground notification to keep service alive
+   - **Actual monitoring**: Done via Accessibility Service (primary) or local timer (fallback)
 
 ### 📝 Implementation Notes
 
-- **Native Android Implementation**: All core functionality (app listing, monitoring, overlay) is implemented natively in Kotlin for better performance and reliability.
-- **Accessibility Service**: Primary method for app detection (faster, more reliable than polling).
-- **UsageStats Polling**: Backup method when Accessibility Service is not enabled.
+- **Accessibility Service**: **ALWAYS PREFERRED** - Primary method for app detection (real-time, more reliable than polling).
+- **UsageStats Polling**: Fallback only when Accessibility Service is not enabled by user.
+- **Native Android Implementation**: App listing, monitoring, overlay all implemented in Kotlin for reliability.
 - **Temporary Unlock**: Apps stay unlocked while in use, re-lock automatically when switched away or killed/resumed.
 - **MethodChannel**: Flutter ↔ Android communication via `NativeService.dart` and `MainActivity.kt`.
+
+### 🔜 Planned: Flutter Lock Screen
+
+Currently using native XML overlay (`lock_screen_overlay.xml`). **Next step**: Replace with Flutter lock screen for richer UI:
+
+**How to show Flutter screen from native Android:**
+1. Accessibility Service detects locked app launch
+2. Native sends event to Flutter via MethodChannel
+3. Flutter shows full lock screen with:
+   - Ayat/Hadith content
+   - Streak display
+   - Reflection timer
+   - Dismiss/unlock option
+4. Use `flutter_overlay_window` package OR launch Flutter as transparent Activity
+
+**Files involved:**
+- `lib/features/app_lock/screens/lock_screen.dart` - Flutter lock screen (to be enhanced)
+- `AppLockAccessibilityService.kt` - Modify to call Flutter instead of native overlay
 
 ---
 

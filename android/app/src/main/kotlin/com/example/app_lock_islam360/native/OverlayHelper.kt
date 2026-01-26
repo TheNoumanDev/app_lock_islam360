@@ -1,7 +1,6 @@
 package com.example.app_lock_islam360.native
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,7 +11,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.FrameLayout
 import com.example.app_lock_islam360.R
 
 /**
@@ -58,42 +56,6 @@ class OverlayHelper(private val context: Context) {
                 Uri.parse("package:${context.packageName}")
             )
             activity.startActivityForResult(intent, REQUEST_OVERLAY_PERMISSION)
-        }
-    }
-
-    /**
-     * Show overlay window
-     * @param view The view to display in overlay
-     */
-    fun showOverlay(view: View) {
-        if (!hasOverlayPermission()) {
-            return
-        }
-
-        closeOverlay() // Close any existing overlay
-
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                @Suppress("DEPRECATION")
-                WindowManager.LayoutParams.TYPE_PHONE
-            },
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            android.graphics.PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.CENTER
-        }
-
-        try {
-            windowManager?.addView(view, params)
-            overlayView = view
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 

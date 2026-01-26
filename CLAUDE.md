@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**App Lock: Islam360** - A Flutter app that intercepts distracting apps and shows Islamic content (Quranic verses, Hadiths) before unlocking. Android-first development with native Kotlin implementation for core functionality.
+**Nafs Guard (App Lock: Islam360)** - A gentle reminder app that intercepts distracting apps and shows Islamic content (Quranic verses, Hadiths) to encourage reflection. Includes Quran reading, Hadith browsing, Prayer times, and Islamic alarms. Android-first development with native Kotlin implementation.
+
+### Core Features
+- **App Lock** - Intercept apps, show Ayat/Hadith reminder (not strict blocker)
+- **Quran Section** - Read Quran with translations
+- **Hadith Section** - Browse Hadith collection
+- **Prayer Times** - Namaz timings
+- **Alarms** - Islamic alarms with wakeup duas + check-ins
+- **Noor Streak** - Track consecutive reflection days
 
 ## Build & Development Commands
 
@@ -53,22 +61,32 @@ Services in `lib/core/services/` wrap native functionality:
 
 ### App Detection Strategy
 
-1. **Primary**: Accessibility Service (`AppLockAccessibilityService`) for instant app launch detection
-2. **Fallback**: UsageStats polling via `AppMonitorHelper` when accessibility not enabled
+1. **Primary (ALWAYS PREFERRED)**: Accessibility Service (`AppLockAccessibilityService`) for instant, real-time app launch detection
+2. **Fallback only**: UsageStats polling via `AppMonitorHelper` when accessibility not enabled by user
+
+### Lock Screen Strategy
+
+- **Current**: Native XML overlay (`lock_screen_overlay.xml`) via `OverlayHelper.kt`
+- **Planned**: Flutter lock screen (`lib/features/app_lock/screens/lock_screen.dart`) with Ayat, streaks, dismiss option
+- **Native → Flutter**: Use MethodChannel to trigger Flutter screen from Accessibility Service
 
 ### Project Structure
 
 ```
-lib/
-├── core/
-│   ├── constants/    # Theme, colors, fonts, strings
-│   ├── models/       # AppInfo, LockSettings
-│   └── services/     # NativeService, AppListService, AppMonitorService, etc.
-├── data/local/       # StorageService (shared_preferences)
-├── features/
-│   ├── app_lock/     # Lock screen UI
-│   └── app_selection/# App selection UI
-└── main.dart
+├── docs/                 # Documentation
+│   ├── NATIVE_IMPLEMENTATION.md
+│   └── ALARM_FEATURE.md  # Alarm implementation research & plan
+├── lib/
+│   ├── core/
+│   │   ├── constants/    # Theme, colors, fonts, strings
+│   │   ├── models/       # AppInfo, LockSettings
+│   │   └── services/     # NativeService, AppListService, AppMonitorService, etc.
+│   ├── data/local/       # StorageService (shared_preferences)
+│   ├── features/
+│   │   ├── app_lock/     # Lock screen UI
+│   │   └── app_selection/# App selection UI
+│   └── main.dart
+└── android/.../native/   # Kotlin native helpers
 ```
 
 ## Android Permissions
@@ -109,6 +127,11 @@ Required permissions configured in `AndroidManifest.xml`:
 - **Android first**: Focus on Android implementation, iOS comes later
 - **Fix issues immediately**: If something breaks, fix it before continuing
 - **Real device testing**: Test on real Android devices for app lock features (not just emulator)
+- **Update docs when code changes**: When modifying code, update relevant documentation:
+  - `CLAUDE.md` - Architecture, conventions, strategies
+  - `README.md` - Features, TODO list, implementation status
+  - `docs/NATIVE_IMPLEMENTATION.md` - Native Android code changes
+  - `docs/ALARM_FEATURE.md` - Alarm feature implementation
 
 ## Testing
 

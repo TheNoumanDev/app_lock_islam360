@@ -36,9 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # App Lock Dependencies
-  # Note: device_apps, usage_stats, and system_alert_window replaced with native Android implementation
-  flutter_background_service: ^5.0.0
-  permission_handler: ^11.3.1
+  # Note: device_apps, usage_stats, system_alert_window, permission_handler replaced with native Android implementation
+  flutter_background_service: ^5.0.0  # Keeps foreground notification active
   shared_preferences: ^2.2.3
 
 dev_dependencies:

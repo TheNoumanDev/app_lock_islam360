@@ -279,6 +279,10 @@ class AppMonitorService {
 }
 
 /// Background service entry point
+/// Note: This is required by flutter_background_service but monitoring logic is handled by:
+/// - Accessibility Service (primary, real-time app detection)
+/// - Local timer in _startLocalMonitoring() (fallback when Accessibility Service disabled)
+/// The service is mainly used to keep a foreground notification active.
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   if (service is AndroidServiceInstance) {
@@ -286,21 +290,10 @@ void onStart(ServiceInstance service) async {
       service.stopSelf();
     });
   }
-
-  // Start monitoring loop
-  Timer.periodic(
-    const Duration(milliseconds: AppConstants.appDetectionInterval),
-    (timer) async {
-      if (service is AndroidServiceInstance) {
-        if (await service.isForegroundService()) {
-          // Monitoring logic here
-        }
-      }
-    },
-  );
+  // Monitoring is handled by Accessibility Service or local timer, not here
 }
 
-/// iOS background handler
+/// iOS background handler (stub - iOS not yet implemented)
 @pragma('vm:entry-point')
 Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
