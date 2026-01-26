@@ -77,11 +77,17 @@ We're following the TODO list in README.md:
 5. Test immediately after creation
 
 ## Testing Approach
-- Test each feature as you build it
-- Use print statements for debugging (remove before commit)
-- Test on real Android device when possible
-- Verify permissions are requested correctly
-- Test app restart scenarios
+- **Write tests alongside implementation**: Every feature must have corresponding tests
+- **Update tests when features change**: If a feature is modified, update its tests immediately
+- **Test structure**: Create test files next to the source files (e.g., `app_list_service_test.dart` next to `app_list_service.dart`)
+- **Test coverage**: Aim for unit tests for services/models, widget tests for UI components
+- **Test naming**: Use descriptive test names: `test_shouldReturnListOfApps_whenGetInstalledAppsCalled()`
+- **Test organization**: Group related tests using `group()` blocks
+- **Real device testing**: Test on real Android device when possible for integration tests
+- **Debug statements**: Use print statements for debugging (remove before commit)
+- **Permission testing**: Verify permissions are requested correctly
+- **Restart scenarios**: Test app restart scenarios
+- **Test files location**: Place tests in `test/` directory mirroring `lib/` structure
 
 ## Important Reminders
 - Always check README.md for project structure and TODO list
