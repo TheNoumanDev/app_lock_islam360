@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/app_list_service.dart';
-import '../../../core/services/app_monitor_service.dart';
+import '../../../core/services/native_service.dart';
 import '../../../core/models/app_info.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
@@ -10,6 +10,7 @@ import '../../../data/local/storage_service.dart';
 import '../widgets/app_item_widget.dart';
 
 /// Screen for selecting apps to lock
+/// Apps are automatically locked when selected (no Start/Stop button needed)
 class AppSelectionScreen extends StatefulWidget {
   const AppSelectionScreen({super.key});
 
@@ -25,27 +26,14 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
   Set<String> _selectedApps = {};
   bool _isLoading = true;
   String _errorMessage = '';
-  bool _isLockActive = false;
   final TextEditingController _searchController = TextEditingController();
-  AppMonitorService? _monitorService;
 
   @override
   void initState() {
     super.initState();
     _initializeStorage();
-    _initializeMonitor();
     _loadApps();
     _searchController.addListener(_onSearchChanged);
-  }
-
-  Future<void> _initializeMonitor() async {
-    try {
-      _monitorService = await AppMonitorService.getInstance();
-      _isLockActive = _monitorService?.isMonitoring ?? false;
-      setState(() {});
-    } catch (e) {
-      debugPrint('Failed to initialize monitor: $e');
-    }
   }
 
   Future<void> _initializeStorage() async {
@@ -53,7 +41,6 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
       _storageService = await StorageService.getInstance();
       await _loadSavedSelections();
     } catch (e) {
-      // Storage initialization failed, continue without saved selections
       debugPrint('Failed to initialize storage: $e');
     }
   }
@@ -71,15 +58,23 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
     }
   }
 
+  /// Save selections and auto-enable/disable lock based on selection
   Future<void> _saveSelections() async {
     try {
       if (_storageService != null) {
         await _storageService!.saveLockedApps(_selectedApps);
-        
-        // Sync to Accessibility Service if monitoring is active
-        if (_monitorService != null && _monitorService!.isMonitoring) {
-          await _monitorService!.syncLockedAppsToAccessibility(_selectedApps);
-        }
+
+        // Auto-enable/disable lock based on whether any apps are selected
+        final hasApps = _selectedApps.isNotEmpty;
+
+        // Sync to native layer (accessibility service)
+        await NativeService.updateLockedAppsForAccessibility(
+            _selectedApps.toList());
+        await NativeService.updateLockEnabledForAccessibility(hasApps);
+
+        debugPrint(hasApps
+            ? 'App lock enabled with ${_selectedApps.length} apps'
+            : 'App lock disabled (no apps selected)');
       }
     } catch (e) {
       debugPrint('Failed to save selections: $e');
@@ -133,7 +128,6 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         _filteredApps = filtered;
       });
     } catch (e) {
-      // If search fails, show all apps
       setState(() {
         _filteredApps = _apps;
       });
@@ -148,21 +142,21 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         _selectedApps.add(packageName);
       }
     });
-    _saveSelections(); // Save after each toggle
+    _saveSelections();
   }
 
   void _selectAll() {
     setState(() {
       _selectedApps = _filteredApps.map((app) => app.packageName).toSet();
     });
-    _saveSelections(); // Save after select all
+    _saveSelections();
   }
 
   void _deselectAll() {
     setState(() {
       _selectedApps.clear();
     });
-    _saveSelections(); // Save after deselect all
+    _saveSelections();
   }
 
   @override
@@ -172,24 +166,39 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         title: Text(AppStrings.selectApps),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
-        actions: [
-          IconButton(
-            icon: Icon(_isLockActive ? Icons.lock : Icons.lock_open),
-            tooltip: _isLockActive ? AppStrings.appLockActive : AppStrings.appLockInactive,
-            onPressed: _toggleAppLock,
-          ),
-        ],
       ),
-      floatingActionButton: _selectedApps.isNotEmpty
-          ? FloatingActionButton.extended(
-              onPressed: _toggleAppLock,
-              backgroundColor: _isLockActive ? AppColors.error : AppColors.primary,
-              icon: Icon(_isLockActive ? Icons.stop : Icons.play_arrow),
-              label: Text(_isLockActive ? AppStrings.stopAppLock : AppStrings.startAppLock),
-            )
-          : null,
       body: Column(
         children: [
+          // Info banner
+          if (_selectedApps.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingMd,
+                vertical: AppConstants.spacingSm,
+              ),
+              color: AppColors.primary.withValues(alpha: 0.1),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 20,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: AppConstants.spacingSm),
+                  Expanded(
+                    child: Text(
+                      'App lock is active for ${_selectedApps.length} app${_selectedApps.length > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        fontSize: AppFonts.sizeSm,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(AppConstants.spacingMd),
@@ -358,165 +367,6 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
           app: app,
           isSelected: _selectedApps.contains(app.packageName),
           onTap: () => _toggleAppSelection(app.packageName),
-        );
-      },
-    );
-  }
-
-  Future<void> _toggleAppLock() async {
-    if (_monitorService == null) {
-      await _initializeMonitor();
-    }
-
-    if (_monitorService == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to initialize app lock service'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    try {
-      if (_isLockActive) {
-        await _monitorService!.stopMonitoring();
-        setState(() {
-          _isLockActive = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('App Lock stopped'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      } else {
-        if (_selectedApps.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Please select at least one app to lock'),
-              backgroundColor: AppColors.warning,
-            ),
-          );
-          return;
-        }
-
-        // Check Accessibility Service permission first
-        final hasAccessibilityPermission = await _monitorService!.isAccessibilityServiceEnabled();
-        if (!hasAccessibilityPermission) {
-          _showAccessibilityPermissionDialog();
-          return;
-        }
-
-        final started = await _monitorService!.startMonitoring();
-        if (started) {
-          setState(() {
-            _isLockActive = true;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('App Lock started! Locked apps will be protected.'),
-              backgroundColor: AppColors.success,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        } else {
-          // Show detailed error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Permission Required',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Grant "Usage Access" permission in Settings, then restart the app.',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-              backgroundColor: AppColors.error,
-              duration: const Duration(seconds: 6),
-              action: SnackBarAction(
-                label: 'Open Settings',
-                textColor: AppColors.textOnPrimary,
-                onPressed: () async {
-                  await _monitorService?.requestUsageStatsPermission();
-                },
-              ),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
-  }
-
-  void _showAccessibilityPermissionDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Accessibility Permission Required',
-            style: TextStyle(
-              fontSize: AppFonts.sizeLg,
-              fontWeight: FontWeight.bold,
-              fontFamily: AppFonts.primary,
-            ),
-          ),
-          content: Text(
-            'To lock apps instantly, please enable Accessibility Service. This allows the app to detect when locked apps are opened.',
-            style: TextStyle(
-              fontSize: AppFonts.sizeBase,
-              fontFamily: AppFonts.primary,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontFamily: AppFonts.primary,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _monitorService?.requestAccessibilityServicePermission();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Please enable "App Lock: Islam360" in Accessibility Settings'),
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(seconds: 4),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child: Text(
-                'Open Settings',
-                style: TextStyle(
-                  color: AppColors.textOnPrimary,
-                  fontFamily: AppFonts.primary,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );

@@ -28,7 +28,7 @@ class AppItemWidget extends StatelessWidget {
           vertical: AppConstants.spacingSm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : null,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : null,
           borderRadius: BorderRadius.circular(AppConstants.radiusMd),
         ),
         child: Row(

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
 import 'package:app_lock_islam360/core/services/app_list_service.dart';
 import 'package:app_lock_islam360/core/models/app_info.dart';
 

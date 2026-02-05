@@ -67,6 +67,7 @@ When you try to open a restricted app (Instagram, TikTok, etc.):
 - `permission_handler` - Handle Android/iOS permissions ✅
 - `shared_preferences` - Local storage for selected apps ✅
 - `flutter_background_service` - Background service (may be removable - see "Extra Code to Remove") ⚠️
+- `sensors_plus` - Shake detection for emergency skip ✅
 
 ### Native Android Implementation (Current)
 - **Kotlin Native Code**:
@@ -78,7 +79,6 @@ When you try to open a restricted app (Instagram, TikTok, etc.):
 - **MethodChannel**: Flutter ↔ Android communication ✅
 
 ### Future Packages (Not Yet Integrated)
-- `shake` - Shake-to-skip gesture
 - `isar` or `hive` - Local storage (streaks, config, cached content)
 - `firebase_core` - Firebase initialization
 - `cloud_firestore` - Firestore database (see Backend Choice below)
@@ -334,16 +334,15 @@ lib/
 
 ## Implementation Priority
 
-1. ✅ **Android PoC** - Build proof of concept on Android first
-2. 🔄 **Core Lock Flow** - Reminder screen with feeling input + content display
-3. 🤖 **LLM Integration** - Map user feelings to Ayat/Hadith
-4. ⚠️ **Battery Optimization** - Critical: Guide users to disable battery optimization
-5. 📊 **Content Curation** - Store Ayat/Hadith in Firestore, ensure quality mappings
-6. ⏱️ **Timer & Streak** - 3-second timer, streak tracking
-7. 📖 **Quran & Hadith Sections** - Full reading/browsing experience
-8. 🕌 **Prayer Times** - Namaz timings display
-9. ⏰ **Alarm Feature** - Islamic alarms with wakeup duas & check-ins (see `docs/ALARM_FEATURE.md`)
-10. 🍎 **iOS** - Implement after Android is stable
+1. ✅ **Android PoC** - Base setup, app listing, selection, native app lock (Phase 1-4)
+2. ✅ **App Shell & Nav** - Bottom nav, home screen, onboarding (Phase 5)
+3. ✅ **Flutter Lock Screen** - Feeling input → Ayat display → countdown (Phase 6)
+4. 📖 **Quran Section** - Read Quran with translations (Phase 7)
+5. 🕌 **Prayer Times** - Namaz timings + countdown (Phase 8)
+6. ⏰ **Alarms** - Islamic alarms with dhikr dismissal (Phase 9)
+7. 🔥 **Firebase Backend** - Auth, Firestore, content sync (Phase 10)
+8. ✨ **Polish & Release** - Streaks, battery guide, testing (Phase 11)
+9. 🍎 **iOS** - After Android is stable
 
 ---
 
@@ -477,144 +476,91 @@ lib/
 
 ---
 
-### Phase 5: Lock Screen Functionality ⚠️ (Partially Complete)
+### Phase 5: App Shell & Navigation ✅
 
-#### 5.1 Basic Lock Screen Features ⚠️
-- [x] Native overlay displays app name that was locked ✅
-- [x] Basic UI (centered text, lock icon, styling) ✅
-- [x] "Unlock" button works ✅
-- [x] Unlock logic:
-  - Dismiss overlay ✅
-  - App stays unlocked while in use ✅
-  - Re-locks on app switch/kill/resume ✅
-- [ ] **TODO**: Polish UI (better styling, colors from theme)
-- [ ] **TODO**: Add Islamic content display (Quranic verses/Hadith)
-- [x] Test: Verified lock screen shows and dismisses correctly ✅
+> Figma reference: `figma/src/app/`
 
-#### 5.2 Prevent App Access ✅
-- [x] Overlay blocks app interaction ✅
-  - Overlay is non-dismissible (except via button) ✅
-  - Touch events blocked ✅
-  - App cannot be accessed while overlay is showing ✅
-- [x] Test: Verified locked app is inaccessible ✅
+- [x] Riverpod state management + GoRouter navigation
+- [x] Bottom navigation (5 tabs): Home, Apps, Alarms, Prayer, Quran
+- [x] Onboarding flow (5 slides from Figma) with persistence
+- [x] Home screen with prayer card, continue reading, Noor Streaks, quick actions
+- [x] Profile screen with achievements and settings
+- [x] Placeholder screens for Alarms, Prayer Times, Quran (Coming Soon)
+- [x] Blue theme (per Figma design)
+- [x] Tests for all new screens and components (50 tests passing)
 
 ---
 
-### Phase 6: Polish & Validation
+### Phase 6: App Lock Flow (Flutter Lock Screen) ✅
 
-#### 6.1 Settings Screen
-- [ ] Create: `lib/features/settings/screens/settings_screen.dart`
-  - Button to go to app selection
-  - Toggle to enable/disable app lock
-  - Show list of currently locked apps
-  - Remove apps from lock list
-- [ ] Add navigation between screens
+> Replace native XML overlay with Flutter UI. Figma: `AppLockInputScreen` → `AyatDisplayScreen`
 
-#### 6.2 Permission Handling
-- [ ] Create permission request flow:
-  - Check all required permissions
-  - Request missing permissions
-  - Show explanation dialogs
-  - Handle permission denial gracefully
-- [ ] Create: `lib/core/utils/permission_helper.dart`
-
-#### 6.3 Battery Optimization
-- [ ] Add battery optimization exemption request
-- [ ] Create tutorial/guide screen for users
-- [ ] Test: Verify app works after battery optimization disabled
-
-#### 6.4 Testing & Bug Fixes
-- [ ] Test on multiple Android versions (if possible)
-- [ ] Test with different apps
-- [ ] Fix any crashes or issues
-- [ ] Verify lock screen appears reliably
-- [ ] Test app restart scenarios
+- [x] Trigger Flutter lock screen from Accessibility Service via MethodChannel ✅
+- [x] Feeling input screen (text input + 10 predefined feelings) ✅
+- [x] Ayat display screen (Arabic + translation + 3-sec countdown) ✅
+- [x] Shake to skip (emergency) using `sensors_plus` ✅
+- [x] Permissions slide in onboarding (Accessibility, Overlay, Notifications) ✅
+- [x] Auto-lock behavior (no Start/Stop button - locks when apps selected) ✅
+- [ ] Per-app lock frequency settings (every time, 1x/2x/3x daily, prayer times)
 
 ---
 
-### Phase 7: Backend Setup (After Android Validation)
+### Phase 7: Quran Section
 
-#### 7.1 Firebase Setup
-- [ ] Create Firebase project in Firebase Console
-- [ ] Add `firebase_core`, `cloud_firestore`, `firebase_auth` to `pubspec.yaml`
-- [ ] Run `flutterfire configure` to generate Firebase config
-- [ ] Create: `lib/data/remote/firebase_service.dart`
-  - Initialize Firebase
-  - Firestore instance setup
-- [ ] Test: Verify connection to Firebase
+> Figma: `QuranRecitation` component
 
-#### 7.2 Firestore Collections
-- [ ] Create collections:
-  - `users/{uid}` (profile, preferences)
-  - `users/{uid}/streaks` (streak history)
-  - `users/{uid}/settings` (app lock settings)
-  - `content/quran` (Ayat with translations, lastUpdated)
-  - `content/hadith` (Hadith collection, lastUpdated)
-  - `mappings/{feeling}` (feeling → content mappings)
-- [ ] Set up Firestore Security Rules
-
-#### 7.3 Authentication
-- [ ] Implement user sign up/login (Firebase Auth)
-- [ ] Create auth service: `lib/core/services/auth_service.dart`
-- [ ] Sync user preferences to Firestore
-
-#### 7.4 Caching Strategy
-- [ ] Implement `lastUpdated` check before fetching content
-- [ ] Cache Quran/Hadith data locally (Isar/Hive)
-- [ ] Only fetch from Firestore if local cache is stale
+- [ ] Surah list screen
+- [ ] Quran reading screen (Arabic + translation)
+- [ ] Continue reading tracker (resume where left off)
+- [ ] Integrate Quran API
 
 ---
 
-### Phase 8: Content Features (Future)
+### Phase 8: Prayer Times (UI Complete)
 
-#### 8.1 Feeling Input
-- [ ] Create feeling input screen
-- [ ] Text input and predefined options
-- [ ] LLM integration for content mapping
+> Figma: `PrayerTimesMinimal` component + Home prayer widget
 
-#### 8.2 Content Display
-- [ ] Integrate Quran/Hadith APIs
-- [ ] Display content on lock screen
-- [ ] Reflection timer (3 seconds)
-
-#### 8.3 Streak Tracking
-- [ ] Implement streak calculation
-- [ ] Display Noor Streak widget
-- [ ] Sync to Firestore
+- [x] Prayer times display (5 daily prayers with tiles)
+- [x] Live countdown timer (HH:MM:SS format, ticks every second)
+- [x] Prayer tile states (completed with checkmark, current with border, upcoming gray)
+- [x] Islamic (Hijri) date display with `hijri` package
+- [x] Gregorian date display
+- [x] Location + Madhab header (Karachi, Hanafi)
+- [x] Home screen prayer card with live countdown
+- [ ] Location-based prayer calculation (API integration pending)
+- [ ] Prayer completion tracking (persistence pending)
 
 ---
 
-### Phase 9: Alarm Feature (Future)
+### Phase 9: Alarms
 
-> See detailed implementation plan: `docs/ALARM_FEATURE.md`
+> See `docs/ALARM_FEATURE.md`. Figma: `AlarmDismissalScreen`
 
-#### 9.1 Basic Alarm Setup
-- [ ] Add alarm permissions to `AndroidManifest.xml`:
-  - `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`
-  - `USE_FULL_SCREEN_INTENT`
-  - `RECEIVE_BOOT_COMPLETED`
-  - `POST_NOTIFICATIONS`
-- [ ] Create native helpers:
-  - `AlarmHelper.kt` - Schedule/cancel alarms
-  - `AlarmReceiver.kt` - Handle alarm triggers
-  - `AlarmNotificationService.kt` - Full-screen notification
-- [ ] Add MethodChannel methods for alarm scheduling
-
-#### 9.2 Alarm UI
-- [ ] Create alarm list screen
-- [ ] Create alarm editor (time picker, repeat days)
-- [ ] Create alarm trigger screen (wakeup dua + check-in)
-
-#### 9.3 Full-Screen Notification
-- [ ] Implement full-screen intent for lock screen display
-- [ ] Handle Android 14+ FSI restrictions
-- [ ] Add snooze/dismiss actions
-
-#### 9.4 Integration
-- [ ] Connect to streak system (morning check-ins)
-- [ ] Add wakeup duas content
+- [ ] Add alarm permissions to manifest
+- [ ] Native alarm scheduling (AlarmHelper, AlarmReceiver, AlarmNotificationService)
+- [ ] Alarm list UI (create/edit/delete)
+- [ ] Alarm trigger screen with dismiss methods (read dhikr, math, slide, shake)
 - [ ] Boot receiver for rescheduling after reboot
-- [ ] Prayer time integration (optional)
+
+---
+
+### Phase 10: Backend & Sync (Firebase)
+
+- [ ] Firebase setup (`flutterfire configure`)
+- [ ] Firebase Auth (email, Google)
+- [ ] Firestore collections (users, content, streaks, settings)
+- [ ] Caching strategy with `lastUpdated` pattern
+- [ ] LLM integration for feeling → content mapping
+
+---
+
+### Phase 11: Polish & Release
+
+- [ ] Battery optimization guide
+- [ ] Permission handling flow (check → request → explain)
+- [ ] Noor Streak tracking & display
+- [ ] Subscription/support screen
+- [ ] Testing on multiple Android versions
 
 ---
 
@@ -642,8 +588,8 @@ lib/
 ```bash
 flutter create app_lock_islam360
 cd app_lock_islam360
-# Current packages (native Android implementation replaces device_apps, usage_stats, system_alert_window)
-flutter pub add permission_handler shared_preferences flutter_background_service
+# Current packages
+flutter pub add shared_preferences flutter_background_service flutter_riverpod go_router
 
 # Future packages (add when needed)
 flutter pub add firebase_core cloud_firestore firebase_auth isar shake
@@ -702,37 +648,30 @@ flutter pub add firebase_core cloud_firestore firebase_auth isar shake
    - Widget tests for UI components
    - Real device testing
 
-### ⚠️ Partially Complete
+7. **Flutter Lock Screen** ✅
+   - Feeling input screen (text input + 10 predefined feelings)
+   - Ayat display screen (Arabic text + translation + reference)
+   - 3-second countdown timer with animations
+   - Shake-to-skip using `sensors_plus` accelerometer
+   - Native → Flutter communication via reverse MethodChannel
+   - Auto-lock behavior (no Start/Stop - locks when apps selected)
 
-1. **Lock Screen UI** ⚠️
-   - Basic overlay works ✅
-   - Needs polish (better styling, theme integration)
-   - Needs Islamic content integration (Quranic verses/Hadith)
+8. **Onboarding Permissions** ✅
+   - Permissions slide with checkboxes (Accessibility, Overlay, Notifications)
+   - Tap-to-grant behavior with status indicators
+   - Permissions provider with lifecycle awareness
 
-2. **Settings Screen** ⚠️
-   - Not yet implemented
-   - Needed for better UX
+### 🔄 Next Up
 
-### ❌ Remaining Work
-
-1. **Phase 6: Polish & Validation**
-   - Settings screen
-   - Battery optimization guide
-   - Comprehensive permission handling improvements
-   - UI polish
-
-2. **Phase 7: Backend Setup**
-   - Firebase/Firestore initialization
-   - Firestore collections setup
-   - Firebase Auth integration
-   - Caching strategy with lastUpdated
-
-3. **Phase 8: Content Features**
-   - Feeling input screen
-   - LLM integration for content mapping
-   - Quran/Hadith API integration
-   - Reflection timer
-   - Streak tracking
+| Phase | What | Status |
+|-------|------|--------|
+| 5 | App shell & navigation (bottom nav, home, onboarding) | ✅ Done |
+| 6 | Flutter lock screen (feeling input → ayat → countdown) | ✅ Done |
+| 7 | Quran section | 📋 Next |
+| 8 | Prayer times (API integration) | Pending |
+| 9 | Alarms | Pending |
+| 10 | Firebase backend & sync | Pending |
+| 11 | Polish & release | Pending |
 
 ### 🗑️ Removed/Deprecated Code
 
@@ -755,23 +694,25 @@ flutter pub add firebase_core cloud_firestore firebase_auth isar shake
 - **Temporary Unlock**: Apps stay unlocked while in use, re-lock automatically when switched away or killed/resumed.
 - **MethodChannel**: Flutter ↔ Android communication via `NativeService.dart` and `MainActivity.kt`.
 
-### 🔜 Planned: Flutter Lock Screen
+### ✅ Flutter Lock Screen (Implemented)
 
-Currently using native XML overlay (`lock_screen_overlay.xml`). **Next step**: Replace with Flutter lock screen for richer UI:
+Native XML overlay replaced with Flutter lock screens:
 
-**How to show Flutter screen from native Android:**
+**How it works:**
 1. Accessibility Service detects locked app launch
-2. Native sends event to Flutter via MethodChannel
-3. Flutter shows full lock screen with:
-   - Ayat/Hadith content
-   - Streak display
-   - Reflection timer
-   - Dismiss/unlock option
-4. Use `flutter_overlay_window` package OR launch Flutter as transparent Activity
+2. Native sends event to Flutter via reverse MethodChannel (`MainActivity.triggerFlutterLockScreen()`)
+3. Flutter shows feeling input screen → ayat display screen
+4. User completes 3-second reflection timer
+5. Done button calls `NativeService.unlockAndContinue()` to allow app access
+6. Shake device to skip in emergencies
 
-**Files involved:**
-- `lib/features/app_lock/screens/lock_screen.dart` - Flutter lock screen (to be enhanced)
-- `AppLockAccessibilityService.kt` - Modify to call Flutter instead of native overlay
+**Key files:**
+- `lib/features/app_lock/screens/feeling_input_screen.dart` - Feeling input (text + 10 predefined)
+- `lib/features/app_lock/screens/ayat_display_screen.dart` - Ayat display with countdown
+- `lib/features/app_lock/data/islamic_content.dart` - Feeling → Ayat mapping
+- `lib/core/services/shake_service.dart` - Shake detection using accelerometer
+- `MainActivity.kt` - Reverse MethodChannel to trigger Flutter
+- `AppLockAccessibilityService.kt` - Prefers Flutter, falls back to native overlay
 
 ---
 

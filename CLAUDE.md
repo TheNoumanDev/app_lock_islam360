@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Role & Standards
+
+You are a **senior Flutter developer**. Follow these rules strictly:
+- Write production-quality, bug-free code. No shortcuts, no TODOs left behind.
+- Write **unit tests** for every service/model and **widget tests** for every new screen/widget.
+- Run `flutter analyze` after changes to catch issues early.
+- **Update documentation** (CLAUDE.md, README.md, docs/) with every code change — no exceptions.
+- Follow the Figma design closely (`figma/src/app/`) for UI implementation.
+
 ## Project Overview
 
 **Nafs Guard (App Lock: Islam360)** - A gentle reminder app that intercepts distracting apps and shows Islamic content (Quranic verses, Hadiths) to encourage reflection. Includes Quran reading, Hadith browsing, Prayer times, and Islamic alarms. Android-first development with native Kotlin implementation.
@@ -76,16 +85,25 @@ Services in `lib/core/services/` wrap native functionality:
 ├── docs/                 # Documentation
 │   ├── NATIVE_IMPLEMENTATION.md
 │   └── ALARM_FEATURE.md  # Alarm implementation research & plan
+├── figma/src/app/        # Figma design exports (React/TSX reference)
 ├── lib/
 │   ├── core/
-│   │   ├── constants/    # Theme, colors, fonts, strings
+│   │   ├── constants/    # Theme, colors, fonts, strings, constants
 │   │   ├── models/       # AppInfo, LockSettings
+│   │   ├── providers/    # Riverpod providers (service_providers, onboarding_provider)
+│   │   ├── router/       # GoRouter config (app_router, app_shell with bottom nav)
 │   │   └── services/     # NativeService, AppListService, AppMonitorService, etc.
 │   ├── data/local/       # StorageService (shared_preferences)
 │   ├── features/
+│   │   ├── alarm/        # Alarm screen (placeholder)
 │   │   ├── app_lock/     # Lock screen UI
-│   │   └── app_selection/# App selection UI
-│   └── main.dart
+│   │   ├── app_selection/# App selection UI (Apps tab)
+│   │   ├── home/         # Home screen + widgets (prayer card, streaks, quick actions)
+│   │   ├── onboarding/   # 5-slide onboarding flow
+│   │   ├── prayer_times/ # Prayer times with live countdown + Hijri date
+│   │   ├── profile/      # Profile screen with achievements & settings
+│   │   └── quran/        # Quran screen (placeholder)
+│   └── main.dart         # ProviderScope + MaterialApp.router
 └── android/.../native/   # Kotlin native helpers
 ```
 
@@ -111,9 +129,12 @@ Required permissions configured in `AndroidManifest.xml`:
 - Add comments for complex logic
 - Always handle errors gracefully with try-catch for async operations
 
-### State Management
-- Use getX for stateManagemetn properly, with cache whereever requried.
-- Alwasy try to use cache with dataTime,a nd check if the firestore has any updated data base don lastUPdated, that hasn't fetched, then only fetche the data.
+### State Management (Riverpod)
+- Use `flutter_riverpod` for all state management
+- Use `AsyncNotifier` + `ref.keepAlive()` for cached data (Quran, Hadith)
+- Use `lastUpdated` timestamp pattern: only fetch from Firestore if local cache is stale
+- Use `StateNotifier` or `Notifier` for simple reactive state (lock state, streaks)
+- Use `go_router` for navigation
 
 ### Testing
 - Tests mirror `lib/` structure in `test/` directory

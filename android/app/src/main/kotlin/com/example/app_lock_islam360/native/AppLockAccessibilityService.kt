@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.content.SharedPreferences
+import com.example.app_lock_islam360.MainActivity
 
 /**
  * Accessibility Service to intercept app launches and show lock screen
@@ -113,26 +114,34 @@ class AppLockAccessibilityService : AccessibilityService() {
             }
             
             Log.d(TAG, "🔒 LOCKED APP DETECTED via Accessibility: $packageName")
-            
-            // Show lock screen overlay (overlay will block the app, no need to force background)
-            overlayHelper?.let { helper ->
-                if (helper.hasOverlayPermission()) {
-                    // Get app name from PackageManager
-                    val appName = try {
-                        val pm = packageManager
-                        val appInfo = pm.getApplicationInfo(packageName, 0)
-                        pm.getApplicationLabel(appInfo).toString()
-                    } catch (e: Exception) {
-                        // Fallback to package name if we can't get app name
-                        packageName.split(".").lastOrNull() ?: packageName
+
+            // Get app name from PackageManager
+            val appName = try {
+                val pm = packageManager
+                val appInfo = pm.getApplicationInfo(packageName, 0)
+                pm.getApplicationLabel(appInfo).toString()
+            } catch (e: Exception) {
+                // Fallback to package name if we can't get app name
+                packageName.split(".").lastOrNull() ?: packageName
+            }
+
+            lastLockedAppPackage = packageName
+            lastLockTime = currentTime
+
+            // Try to trigger Flutter lock screen first (preferred - has better UI)
+            if (MainActivity.isFlutterReady()) {
+                Log.d(TAG, "📱 Triggering Flutter lock screen for $packageName ($appName)")
+                MainActivity.triggerFlutterLockScreen(packageName, appName)
+            } else {
+                // Fallback to native overlay if Flutter app is not running
+                Log.d(TAG, "Flutter not ready, using native overlay for $packageName")
+                overlayHelper?.let { helper ->
+                    if (helper.hasOverlayPermission()) {
+                        helper.showLockScreen(appName, packageName)
+                        Log.d(TAG, "✅ Native lock screen shown for $packageName ($appName)")
+                    } else {
+                        Log.w(TAG, "⚠️ Cannot show lock screen: No overlay permission")
                     }
-                    
-                    helper.showLockScreen(appName, packageName) // Pass package name for tracking
-                    lastLockedAppPackage = packageName
-                    lastLockTime = currentTime
-                    Log.d(TAG, "✅ Lock screen shown for $packageName ($appName) via Accessibility Service")
-                } else {
-                    Log.w(TAG, "⚠️ Cannot show lock screen: No overlay permission")
                 }
             }
         } else {

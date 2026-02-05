@@ -115,8 +115,31 @@ class StorageService {
     }
   }
 
+  /// Save onboarding complete state
+  Future<bool> saveOnboardingComplete(bool complete) async {
+    try {
+      final prefs = await _getPrefs();
+      return await prefs.setBool(
+        AppConstants.storageKeyOnboardingComplete,
+        complete,
+      );
+    } catch (e) {
+      throw Exception('Failed to save onboarding state: $e');
+    }
+  }
+
+  /// Load onboarding complete state
+  Future<bool> loadOnboardingComplete() async {
+    try {
+      final prefs = await _getPrefs();
+      return prefs.getBool(AppConstants.storageKeyOnboardingComplete) ?? false;
+    } catch (e) {
+      throw Exception('Failed to load onboarding state: $e');
+    }
+  }
+
   /// Clear all storage
-  /// 
+  ///
   /// Removes all stored data
   Future<bool> clearAll() async {
     try {

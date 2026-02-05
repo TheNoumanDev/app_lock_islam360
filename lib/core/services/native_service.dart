@@ -203,4 +203,45 @@ class NativeService {
       throw Exception('Failed to update lock enabled: ${e.message}');
     }
   }
+
+  // ==================== Lock Screen Methods ====================
+
+  /// Unlock app and allow user to continue using it
+  /// Called after user completes the reflection flow or shakes to skip
+  static Future<void> unlockAndContinue(String packageName) async {
+    try {
+      await _channel.invokeMethod('unlockAndContinue', {'packageName': packageName});
+    } on PlatformException catch (e) {
+      throw Exception('Failed to unlock app: ${e.message}');
+    }
+  }
+
+  /// Minimize the Flutter activity and return to the locked app
+  /// Called after unlock to let user continue using the unlocked app
+  static Future<void> minimizeApp() async {
+    try {
+      await _channel.invokeMethod('minimizeApp');
+    } on PlatformException catch (e) {
+      throw Exception('Failed to minimize app: ${e.message}');
+    }
+  }
+
+  /// Check if notification permission is granted (Android 13+)
+  static Future<bool> hasNotificationPermission() async {
+    try {
+      final bool result = await _channel.invokeMethod('hasNotificationPermission');
+      return result;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  /// Request notification permission (Android 13+)
+  static Future<void> requestNotificationPermission() async {
+    try {
+      await _channel.invokeMethod('requestNotificationPermission');
+    } on PlatformException catch (e) {
+      throw Exception('Failed to request notification permission: ${e.message}');
+    }
+  }
 }

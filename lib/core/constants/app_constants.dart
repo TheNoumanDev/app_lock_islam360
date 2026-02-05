@@ -53,6 +53,7 @@ class AppConstants {
   static const String storageKeyLockedApps = 'locked_apps';
   static const String storageKeyLockEnabled = 'lock_enabled';
   static const String storageKeySettings = 'app_settings';
+  static const String storageKeyOnboardingComplete = 'onboarding_complete';
 
   // App Detection
   static const int appDetectionInterval = 500; // milliseconds

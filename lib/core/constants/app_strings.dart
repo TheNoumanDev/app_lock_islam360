@@ -78,4 +78,98 @@ class AppStrings {
   // Loading States
   static const String loading = 'Loading...';
   static const String pleaseWait = 'Please wait...';
+
+  // Navigation
+  static const String navHome = 'Home';
+  static const String navApps = 'Apps';
+  static const String navAlarms = 'Alarms';
+  static const String navPrayer = 'Prayer';
+  static const String navQuran = 'Quran';
+
+  // Home Screen
+  static const String homeGreeting = 'Assalamu Alaikum';
+  static const String homeNextPrayer = 'Next Prayer';
+  static const String homeContinueReading = 'Continue Reading';
+  static const String homeNoorStreak = 'Noor Streak';
+  static const String homeQuickActions = 'Quick Actions';
+  static const String homeAppLockReflections = 'App Lock\nReflections';
+  static const String homeNamazStreak = 'Namaz\nStreak';
+  static const String homeAyatReadings = 'Ayat\nReadings';
+  static const String homeDailyEngagement = 'Daily\nEngagement';
+  static const String homeViewProfile = 'View Profile';
+
+  // Onboarding
+  static const String onboardingTitle1 = 'Lock Distracting Apps';
+  static const String onboardingDesc1 =
+      'Choose which apps to lock. Get inspired with Quran verses and Hadith before opening them. Configure locks to activate: every time, once/twice/thrice daily, or only during prayer times.';
+  static const String onboardingTitle2 = 'Turn Distractions into Dhikr';
+  static const String onboardingDesc2 =
+      'When you open a locked app, share how you\'re feeling. We\'ll show you a relevant Ayat or Hadith to reflect on before continuing. Shake to skip in emergencies.';
+  static const String onboardingTitle3 = 'Wake Up with Purpose';
+  static const String onboardingDesc3 =
+      'Set alarms that require mindful dismissal. Choose your method: read a dhikr and tap done, solve a simple math problem, slide to dismiss, or shake your phone.';
+  static const String onboardingTitle4 = 'Read Quran Daily';
+  static const String onboardingDesc4 =
+      'Track your Quran reading progress. Always continue from where you left off. Build a consistent reading habit with streak tracking.';
+  static const String onboardingTitle5 = 'Support the Mission';
+  static const String onboardingDesc5 =
+      'Help us keep this app ad-free and continuously improving. Your contribution helps spread Islamic knowledge.';
+  static const String onboardingGetStarted = 'Get Started';
+  static const String onboardingSubscribeNow = 'Subscribe Now';
+  static const String onboardingContinueFree = 'Continue for free';
+  static const String onboardingCancelAnytime = 'Cancel anytime • 7-day free trial';
+  static const String onboardingPrice = '₹299/month';
+
+  // Profile
+  static const String profile = 'Profile';
+  static const String profileAchievements = 'Achievements';
+  static const String profileSettings = 'Settings';
+  static const String profileNotifications = 'Notifications';
+  static const String profileAppearance = 'Appearance';
+  static const String profileAbout = 'About';
+  static const String profilePrivacy = 'Privacy Policy';
+  static const String profileTerms = 'Terms of Service';
+
+  // Placeholder
+  static const String comingSoon = 'Coming Soon';
+  static const String comingSoonDesc = 'This feature is under development';
+
+  // Prayer Times
+  static const String prayerUpcoming = 'UPCOMING';
+  static const String prayerUntil = 'until';
+  static const String prayerFajr = 'Fajr';
+  static const String prayerDhuhr = 'Dhuhr';
+  static const String prayerAsr = 'Asr';
+  static const String prayerMaghrib = 'Maghrib';
+  static const String prayerIsha = 'Isha';
+  static const String prayerHanafi = 'Hanafi';
+  static const String prayerShafi = 'Shafi';
+
+  // Onboarding Permissions Slide
+  static const String onboardingTitlePermissions = 'Grant Permissions';
+  static const String onboardingDescPermissions =
+      'These permissions are required for the app to work properly. Tap each to grant access.';
+  static const String permissionAccessibility = 'Accessibility Service';
+  static const String permissionAccessibilityDesc =
+      'Required to detect when you open locked apps and show reminders';
+  static const String permissionOverlay = 'Display Over Apps';
+  static const String permissionOverlayDesc =
+      'Required to show the lock screen over other apps';
+  static const String permissionNotification = 'Notifications';
+  static const String permissionNotificationDesc =
+      'Required to show reminders and keep the service running';
+  static const String permissionGranted = 'Granted';
+  static const String permissionNotGranted = 'Tap to grant';
+  static const String permissionRequired = 'Required';
+  static const String permissionOptional = 'Optional';
+
+  // Lock Screen
+  static const String lockHowFeeling = 'How are you feeling right now?';
+  static const String lockWhyReaching = 'Why am I reaching for this app?';
+  static const String lockOrChooseBelow = 'or choose from below';
+  static const String lockQuranicVerse = 'QURANIC VERSE';
+  static const String lockHadith = 'HADITH';
+  static const String lockReflecting = 'Take a moment to reflect...';
+  static const String lockReflectionComplete = 'Reflection complete';
+  static const String lockShakeToSkip = 'Shake device to skip in emergencies';
 }
